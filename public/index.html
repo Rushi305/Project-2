@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talk to Rev - Voice Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .logo {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .api-config {
+            position: absolute;
+            top: 30px;
+            right: 250px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .api-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 12px;
+            width: 200px;
+            backdrop-filter: blur(10px);
+        }
+
+        .api-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .api-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ea4335;
+            transition: background-color 0.3s ease;
+        }
+
+        .api-status.connected {
+            background: #34a853;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 30px;
+            right: 100px;
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 4px;
+            width: 60px;
+            height: 32px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .theme-toggle.light-mode {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-knob {
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .theme-knob::before {
+            content: '🌙';
+        }
+
+        .theme-toggle.light-mode .theme-knob {
+            transform: translateX(28px);
+            background: #f0f0f0;
+        }
+
+        .theme-toggle.light-mode .theme-knob::before {
+            content: '☀';
+        }
+
+        /* Light theme styles */
+        body.light-theme {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 50%, #e0eafc 100%);
+            color: #333;
+        }
+
+        body.light-theme .logo {
+            color: #333;
+        }
+
+        body.light-theme .talk-to-rev-text {
+            color: #333;
+        }
+
+        body.light-theme .robot-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        body.light-theme .voice-interface,
+        body.light-theme .transcript-container {
+            background: rgba(255, 255, 255, 0.8);
+            color: #333;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-theme .language-selector,
+        body.light-theme .api-input {
+            background: rgba(255, 255, 255, 0.8);
+            color: #333;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-theme .api-input::placeholder {
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        body.light-theme .connection-status {
+            color: #666;
+        }
+
+        body.light-theme .revolt-info {
+            color: #666;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .robot-container {
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .robot-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #00d4aa 0%, #1e88e5 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .robot-face {
+            color: white;
+            font-size: 32px;
+        }
+
+        .talk-to-rev-text {
+            font-size: 48px;
+            font-weight: 300;
+            color: white;
+            margin: 0;
+        }
+
+        .microphone-container {
+            margin-top: 60px;
+            position: relative;
+        }
+
+        .microphone-button {
+            width: 120px;
+            height: 120px;
+            background: #4285f4;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(66, 133, 244, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .microphone-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 40px rgba(66, 133, 244, 0.4);
+        }
+
+        .microphone-button.listening {
+            background: #ea4335;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .microphone-button.processing {
+            background: #fbbc05;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 8px 32px rgba(234, 67, 53, 0.3);
+            }
+            50% { 
+                transform: scale(1.1);
+                box-shadow: 0 12px 48px rgba(234, 67, 53, 0.5);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .microphone-icon {
+            width: 40px;
+            height: 40px;
+            fill: white;
+        }
+
+        .status-text {
+            position: absolute;
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 16px;
+            opacity: 0.7;
+            white-space: nowrap;
+        }
+
+        .transcript-container {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 600px;
+            width: 90%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .transcript-container.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .transcript-text {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .response-text {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #4285f4;
+            font-style: italic;
+        }
+
+        .language-selector {
+            position: absolute;
+            top: 30px;
+            right: 180px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 8px 16px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+        }
+
+        .error-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ea4335;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .error-message.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .connection-status {
+            position: absolute;
+            top: 80px;
+            left: 30px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ea4335;
+            transition: background-color 0.3s ease;
+        }
+
+        .status-dot.connected {
+            background: #34a853;
+        }
+
+        .wave-animation {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            animation: wave 2s ease-out infinite;
+            opacity: 0;
+        }
+
+        .microphone-button.listening .wave-animation {
+            opacity: 1;
+        }
+
+        @keyframes wave {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        .revolt-info {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            opacity: 0.5;
+            font-size: 12px;
+        }
+
+        .typing-indicator {
+            display: none;
+            font-size: 14px;
+            color: #4285f4;
+            font-style: italic;
+        }
+
+        .typing-indicator.visible {
+            display: block;
+        }
+
+        .typing-dots {
+            display: inline-block;
+            animation: typing 1.4s infinite;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% { opacity: 0; }
+            30% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="logo">REVOLT</div>
+    
+    <div class="api-config">
+        <input type="password" class="api-input" id="apiKeyInput" placeholder="Enter OpenAI API Key (optional)">
+        <div class="api-status" id="apiStatus" title="API Status"></div>
+    </div>
+    
+    <div class="theme-toggle" id="themeToggle">
+        <div class="theme-knob"></div>
+    </div>
+
+    <select class="language-selector" id="languageSelector">
+        <option value="en-US">English (US)</option>
+        <option value="hi-IN">हिन्दी (Hindi)</option>
+        <option value="ta-IN">தமிழ் (Tamil)</option>
+        <option value="te-IN">తెలుగు (Telugu)</option>
+        <option value="kn-IN">ಕನ್ನಡ (Kannada)</option>
+        <option value="mr-IN">मराठी (Marathi)</option>
+        <option value="bn-IN">বাংলা (Bengali)</option>
+        <option value="gu-IN">ગુજરાતી (Gujarati)</option>
+    </select>
+
+    <div class="connection-status">
+        <div class="status-dot connected" id="statusDot"></div>
+        <span>Ready to chat</span>
+    </div>
+
+    <div class="main-content">
+        <div class="robot-container">
+            <div class="robot-avatar">
+                <div class="robot-face">
+                    <img src="https://live.revoltmotors.com/images/Rev.gif" alt="Rev Animation" style="width:60px; height:60px; border-radius:50%;">
+                </div>
+            </div>
+            <h1 class="talk-to-rev-text">Talk to Rev</h1>
+        </div>
+
+        <div class="microphone-container">
+            <button class="microphone-button" id="micButton">
+                <div class="wave-animation"></div>
+                <div class="wave-animation" style="animation-delay: 0.3s;"></div>
+                <div class="wave-animation" style="animation-delay: 0.6s;"></div>
+                <svg class="microphone-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                    <path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z"/>
+                    <path d="M19 11a1 1 0 0 0-2 0 5 5 0 0 1-10 0 1 1 0 0 0-2 0 7 7 0 0 0 6 6.92V21H9a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2h-2v-3.08A7 7 0 0 0 19 11z"/>
+                </svg>
+            </button>
+            <div class="status-text" id="statusText">Click to start talking</div>
+        </div>
+    </div>
+
+    <div class="transcript-container" id="transcriptContainer">
+        <div class="transcript-text" id="transcriptText"></div>
+        <div class="typing-indicator" id="typingIndicator">
+            Rev is thinking<span class="typing-dots">...</span>
+        </div>
+        <div class="response-text" id="responseText"></div>
+    </div>
+
+    <div class="error-message" id="errorMessage"></div>
+
+    <div class="revolt-info">
+        Powered by OpenAI GPT-4 • Revolt Motors Voice Assistant
+    </div>
+
+    <script>
+        class RevoltVoiceInterface {
+            constructor() {
+                this.isListening = false;
+                this.isProcessing = false;
+                this.currentLanguage = 'en-US';
+                this.recognition = null;
+                this.synthesis = null;
+                this.conversationHistory = [];
+                this.apiKey = '';
+                this.useOpenAI = false;
+                
+                this.initializeElements();
+                this.initializeVoiceRecognition();
+                this.initializeSpeechSynthesis();
+                this.bindEvents();
+                this.loadApiKey();
+                
+                // Greet user
+                setTimeout(() => {
+                    this.speakResponse("Hello! I'm Rev, your intelligent Revolt Motors assistant. I'm now powered by advanced AI to give you real-time, personalized responses. Click the microphone and let's chat!");
+                }, 1500);
+            }
+
+            initializeElements() {
+                this.micButton = document.getElementById('micButton');
+                this.statusText = document.getElementById('statusText');
+                this.transcriptContainer = document.getElementById('transcriptContainer');
+                this.transcriptText = document.getElementById('transcriptText');
+                this.responseText = document.getElementById('responseText');
+                this.errorMessage = document.getElementById('errorMessage');
+                this.themeToggle = document.getElementById('themeToggle');
+                this.languageSelector = document.getElementById('languageSelector');
+                this.statusDot = document.getElementById('statusDot');
+                this.apiKeyInput = document.getElementById('apiKeyInput');
+                this.apiStatus = document.getElementById('apiStatus');
+                this.typingIndicator = document.getElementById('typingIndicator');
+            }
+
+            loadApiKey() {
+                const savedKey = this.getCookie('openai_key');
+                if (savedKey) {
+                    this.apiKey = savedKey;
+                    this.apiKeyInput.value = '••••••••••••••••';
+                    this.useOpenAI = true;
+                    this.apiStatus.classList.add('connected');
+                    this.apiStatus.title = 'OpenAI API Connected';
+                }
+            }
+
+            setCookie(name, value, days = 7) {
+                const expires = new Date(Date.now() + days * 864e5).toUTCString();
+                document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/; SameSite=Strict';
+            }
+
+            getCookie(name) {
+                return document.cookie.split('; ').reduce((r, v) => {
+                    const parts = v.split('=');
+                    return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+                }, '');
+            }
+
+            initializeVoiceRecognition() {
+                if ('webkitSpeechRecognition' in window) {
+                    this.recognition = new webkitSpeechRecognition();
+                } else if ('SpeechRecognition' in window) {
+                    this.recognition = new SpeechRecognition();
+                } else {
+                    this.showError('Speech recognition not supported in this browser');
+                    return;
+                }
+
+                this.recognition.continuous = true;
+                this.recognition.interimResults = true;
+                this.recognition.lang = this.currentLanguage;
+
+                this.recognition.onstart = () => {
+                    this.isListening = true;
+                    this.micButton.classList.add('listening');
+                    this.statusText.textContent = 'Listening...';
+                };
+
+                this.recognition.onresult = (event) => {
+                    let finalTranscript = '';
+                    let interimTranscript = '';
+
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const transcript = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) {
+                            finalTranscript += transcript;
+                        } else {
+                            interimTranscript += transcript;
+                        }
+                    }
+
+                    const displayText = finalTranscript + (interimTranscript ? ' ' + interimTranscript : '');
+                    this.transcriptText.textContent = displayText;
+                    this.transcriptContainer.classList.add('visible');
+                    
+                    if (finalTranscript.trim()) {
+                        this.conversationHistory.push({
+                            role: 'user',
+                            content: finalTranscript.trim(),
+                            timestamp: new Date()
+                        });
+                        this.processUserInput(finalTranscript.trim());
+                        this.stopListening();
+                    }
+                };
+
+                this.recognition.onerror = (event) => {
+                    this.showError(`Speech recognition error: ${event.error}`);
+                    this.stopListening();
+                };
+
+                this.recognition.onend = () => {
+                    if (this.isListening && !this.isProcessing) {
+                        setTimeout(() => {
+                            if (this.isListening) {
+                                this.recognition.start();
+                            }
+                        }, 100);
+                    }
+                };
+            }
+
+            initializeSpeechSynthesis() {
+                this.synthesis = window.speechSynthesis;
+            }
+
+            bindEvents() {
+                this.micButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (this.isListening) {
+                        this.stopListening();
+                    } else if (!this.isProcessing) {
+                        this.startListening();
+                    }
+                });
+
+                this.themeToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.toggleTheme();
+                });
+
+                this.languageSelector.addEventListener('change', (e) => {
+                    this.currentLanguage = e.target.value;
+                    if (this.recognition) {
+                        this.recognition.lang = this.currentLanguage;
+                    }
+                });
+
+                this.apiKeyInput.addEventListener('change', (e) => {
+                    const key = e.target.value;
+                    if (key && key !== '••••••••••••••••') {
+                        this.apiKey = key;
+                        this.setCookie('openai_key', key);
+                        this.useOpenAI = true;
+                        this.apiStatus.classList.add('connected');
+                        this.apiStatus.title = 'OpenAI API Connected';
+                        this.apiKeyInput.value = '••••••••••••••••';
+                        this.speakResponse("Great! I'm now connected to OpenAI for even smarter responses!");
+                    }
+                });
+
+                // Handle interruptions
+                document.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space' && !e.repeat) {
+                        e.preventDefault();
+                        if (this.synthesis.speaking) {
+                            this.synthesis.cancel();
+                            this.statusText.textContent = 'Interrupted - Starting to listen...';
+                            setTimeout(() => this.startListening(), 100);
+                        } else if (!this.isListening && !this.isProcessing) {
+                            this.startListening();
+                        }
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (this.synthesis.speaking && 
+                        !this.micButton.contains(e.target) && 
+                        !this.themeToggle.contains(e.target) &&
+                        !this.apiKeyInput.contains(e.target)) {
+                        this.synthesis.cancel();
+                        this.statusText.textContent = 'Ready to listen';
+                    }
+                });
+            }
+
+            startListening() {
+                if (!this.recognition || this.isListening || this.isProcessing) return;
+
+                try {
+                    this.transcriptContainer.classList.add('visible');
+                    this.transcriptText.textContent = '';
+                    this.responseText.textContent = '';
+                    this.typingIndicator.classList.remove('visible');
+                    this.recognition.start();
+                } catch (error) {
+                    this.showError(`Failed to start listening: ${error.message}`);
+                }
+            }
+
+            stopListening() {
+                this.isListening = false;
+                this.micButton.classList.remove('listening');
+                this.statusText.textContent = 'Processing...';
+                
+                if (this.recognition) {
+                    this.recognition.stop();
+                }
+            }
+
+            async processUserInput(transcript) {
+                this.isProcessing = true;
+                this.micButton.classList.add('processing');
+                this.typingIndicator.classList.add('visible');
+                this.statusText.textContent = 'Rev is thinking...';
+
+                try {
+                    let response;
+                    if (this.useOpenAI && this.apiKey) {
+                        response = await this.getOpenAIResponse(transcript);
+                    } else {
+                        response = await this.getSmartLocalResponse(transcript);
+                    }
+                    
+                    this.handleAIResponse(response);
+                } catch (error) {
+                    console.error('Error processing input:', error);
+                    this.showError('Sorry, I had trouble processing that. Please try again.');
+                    this.handleAIResponse("I apologize, I'm having trouble processing your request right now. Could you please try again?");
+                }
+
+                this.isProcessing = false;
+                this.micButton.classList.remove('processing');
+                this.typingIndicator.classList.remove('visible');
+            }
+
+            async getOpenAIResponse(transcript) {
+                const systemPrompt = `You are Rev, the friendly and knowledgeable voice assistant for Revolt Motors, India's leading electric motorcycle company. 
+
+Key information about Revolt Motors:
+- RV400 BRZ: ₹1,24,999 (entry model)
+- RV400: ₹1,43,999 (premium model)  
+- Range: 150km certified range
+- Battery: 3.24 kWh lithium-ion with 3-year warranty
+- Charging: 4.5 hours full charge, portable charger
+- Top speed: 85 km/h
+- Features: 4 riding modes, MyRevolt app, sound system, LED lighting
+- Cities: Delhi, Mumbai, Pune, Bangalore, Chennai, Hyderabad, Ahmedabad and expanding
+- EMI: Starting from ₹2,999/month
+- Running cost: ~₹1 per km vs ₹3-4 for petrol bikes
+
+Personality:
+- Conversational, friendly, and enthusiastic
+- Use a warm, human-like tone
+- Keep responses concise (2-3 sentences max for voice)
+- Be helpful and informative
+- Show excitement about electric mobility
+- Use "we" when referring to Revolt Motors
+
+Always aim to be helpful while staying true to Revolt's innovative, eco-friendly brand values.`;
+
+                const messages = [
+                    { role: 'system', content: systemPrompt },
+                    ...this.conversationHistory.slice(-10), // Keep last 10 messages for context
+                    { role: 'user', content: transcript }
+                ];
+
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-4',
+                        messages: messages,
+                        max_tokens: 200,
+                        temperature: 0.7,
+                        presence_penalty: 0.1,
+                        frequency_penalty: 0.1
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`OpenAI API error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.choices[0].message.content.trim();
+            }
+
+            async getSmartLocalResponse(transcript) {
+                // Enhanced local AI with better context awareness and dynamic responses
+                const lowerTranscript = transcript.toLowerCase();
+                const context = this.getConversationContext();
+                
+                // Generate more dynamic responses based on context
+                const responses = this.generateContextualResponses(lowerTranscript, context);
+                
+                // Add some randomization to avoid repetitive responses
+                if (Array.isArray(responses)) {
+                    return responses[Math.floor(Math.random() * responses.length)];
+                }
+                
+                return responses;
+            }
+
+            getConversationContext() {
+                const recentHistory = this.conversationHistory.slice(-5);
+                const topics = recentHistory.map(msg => msg.content.toLowerCase()).join(' ');
+                
+                return {
+                    hasDiscussedPrice: topics.includes('price') || topics.includes('cost'),
+                    hasDiscussedRange: topics.includes('range') || topics.includes('battery'),
+                    hasDiscussedTestRide: topics.includes('test') || topics.includes('ride'),
+                    isReturningUser: this.conversationHistory.length > 5,
+                    timeOfDay: new Date().getHours()
+                };
+            }
+
+            generateContextualResponses(input, context) {
+                // Greetings with context
+                if (input.includes('hello') || input.includes('hi') || input.includes('hey')) {
+                    if (context.isReturningUser) {
+                        return [
+                            "Welcome back! It's great to chat with you again. What can I help you with today?",
+                            "Hey there! Nice to see you again. How can I assist you with Revolt bikes today?",
+                            "Hello again! I'm here and ready to help. What would you like to know?"
+                        ];
+                    } else {
+                        return [
+                            "Hello! I'm Rev, your personal Revolt Motors assistant. I'm here to help you discover the future of electric mobility. What interests you most?",
+                            "Hi there! Great to meet you. I'm Rev, and I'm excited to tell you all about our amazing electric bikes. What would you like to know?",
+                            "Hey! Welcome to the Revolt family. I'm Rev, and I'm here to help you find the perfect electric bike. What can I tell you about?"
+                        ];
+                    }
+                }
+                
+                // Pricing with context
+                if (input.includes('price') || input.includes('cost') || input.includes('how much')) {
+                    if (context.hasDiscussedPrice) {
+                        return [
+                            "As I mentioned, our RV400 BRZ is ₹1,24,999 and the RV400 is ₹1,43,999. Would you like to know about our special financing offers?",
+                            "The pricing I shared earlier - starting from ₹1,24,999. But let me tell you about our EMI plans that make it super affordable!",
+                            "Same great prices as before! But have I mentioned our exchange
