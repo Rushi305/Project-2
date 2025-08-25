@@ -841,4 +841,233 @@ Always aim to be helpful while staying true to Revolt's innovative, eco-friendly
                         return [
                             "As I mentioned, our RV400 BRZ is ₹1,24,999 and the RV400 is ₹1,43,999. Would you like to know about our special financing offers?",
                             "The pricing I shared earlier - starting from ₹1,24,999. But let me tell you about our EMI plans that make it super affordable!",
-                            "Same great prices as before! But have I mentioned our exchange
+                            "Same great prices as before! But have I mentioned our exchange bonus offers?"
+                        ];
+                    } else {
+                        return [
+                            "Great question! Our RV400 BRZ starts at ₹1,24,999, and the premium RV400 is ₹1,43,999. With EMIs from just ₹2,999 per month, it's quite affordable. Want to know about the features?",
+                            "Excellent timing to ask! The RV400 BRZ is ₹1,24,999 and RV400 is ₹1,43,999. But here's the exciting part - you'll save thousands monthly on fuel costs. Interested in the savings calculator?",
+                            "Perfect question! Starting at ₹1,24,999 for the BRZ model. We also have easy financing options and exchange bonuses. Should I explain how much you'll save compared to petrol bikes?"
+                        ];
+                    }
+                }
+                
+                // Range and battery with intelligence
+                if (input.includes('range') || input.includes('battery') || input.includes('mileage')) {
+                    const timeBasedAddition = context.timeOfDay < 12 ? "Perfect for your morning commute!" : 
+                                            context.timeOfDay < 18 ? "Great for your daily travels!" : 
+                                            "Ideal for your evening rides!";
+                    
+                    return [
+                        `The RV400 delivers 150 kilometers of certified range on a single charge. That's real-world tested! ${timeBasedAddition} The 3.24 kWh battery comes with a 3-year warranty too.`,
+                        `Impressive 150km range with our advanced lithium-ion battery! ${timeBasedAddition} In eco mode, many riders get even more. Plus, charging is super convenient at home.`,
+                        `You'll love this - 150 kilometers certified range! ${timeBasedAddition} The battery has a 3-year warranty, so you're completely covered.`
+                    ];
+                }
+                
+                // Test ride with location awareness
+                if (input.includes('test ride') || input.includes('booking') || input.includes('book') || input.includes('try')) {
+                    return [
+                        "Absolutely! Nothing beats experiencing the smooth, silent power yourself. We offer test rides at all showrooms, and in many cities, we even come to your location. Which city are you in?",
+                        "Yes! A test ride will show you why riders fall in love with electric. We have showrooms across major cities, plus home test rides in select areas. Where should I arrange yours?",
+                        "Smart move! Once you feel that instant torque and whisper-quiet ride, you'll be convinced. We can arrange a test ride at our showroom or potentially at your location. What's your city?"
+                    ];
+                }
+                
+                // Charging solutions
+                if (input.includes('charging') || input.includes('charge time') || input.includes('how to charge')) {
+                    return [
+                        "Super simple! You get a portable charger that plugs into any regular 15-amp socket - just like your laptop charger but for your bike! Takes 4.5 hours for a full charge. Charge at home, office, anywhere!",
+                        "Charging is incredibly convenient. The portable charger works with any standard wall socket. 4.5 hours gets you 150km of range. Plus, we're setting up fast charging stations across cities!",
+                        "One of the best parts! Your bike comes with a portable charger - plug it anywhere there's a normal socket. 4.5 hours later, you're ready for 150km! No special infrastructure needed."
+                    ];
+                }
+                
+                // Features and technology
+                if (input.includes('features') || input.includes('speed') || input.includes('specifications') || input.includes('smart')) {
+                    return [
+                        "The RV400 is loaded with smart tech! You get 4 riding modes, mobile connectivity through MyRevolt app, custom sound system, LED lighting, and 85 km/h top speed. It's like a smartphone on wheels!",
+                        "Amazing features await! 4 riding modes for every situation, app connectivity for remote monitoring, unique sound system with custom horns, full LED lighting, and a top speed of 85 km/h. Want to know about any specific feature?",
+                        "It's packed with innovation! The MyRevolt app lets you monitor everything remotely, there are 4 riding modes, a cool sound system, premium LED lights, and it hits 85 km/h easily. Which feature excites you most?"
+                    ];
+                }
+                
+                // Environmental and savings focus
+                if (input.includes('savings') || input.includes('fuel') || input.includes('petrol') || input.includes('environment')) {
+                    return [
+                        "The savings are incredible! At just ₹1 per kilometer versus ₹3-4 for petrol bikes, you'll save thousands monthly. Plus zero emissions, minimal maintenance, and no noise pollution. Your wallet and the planet will thank you!",
+                        "Here's what's exciting - running costs of barely ₹1 per km compared to ₹3-4 for petrol. That's 70% savings! Add zero pollution, whisper-quiet rides, and minimal servicing. It's win-win-win!",
+                        "The math is amazing! With electricity at ₹1 per unit, your cost per kilometer is just ₹1 versus ₹3-4 for petrol bikes. You're looking at saving ₹2,000-4,000 monthly, plus helping the environment!"
+                    ];
+                }
+                
+                // Showrooms and availability
+                if (input.includes('showroom') || input.includes('location') || input.includes('where') || input.includes('near me')) {
+                    return [
+                        "We're expanding rapidly! Currently in Delhi, Mumbai, Pune, Bangalore, Chennai, Hyderabad, Ahmedabad, and many more cities. Which city are you looking for? I can share the exact address and contact details.",
+                        "Great news - we have showrooms in all major cities including Delhi, Mumbai, Pune, Bangalore, Chennai, Hyderabad, and more. We're adding new locations monthly! Which city should I help you with?",
+                        "We're in Delhi, Mumbai, Pune, Bangalore, Chennai, Hyderabad, Ahmedabad and expanding fast! New showrooms opening regularly. Tell me your city and I'll give you the nearest location details."
+                    ];
+                }
+                
+                // Comparison questions
+                if (input.includes('compare') || input.includes('versus') || input.includes('better') || input.includes('difference')) {
+                    return [
+                        "Great question! Electric beats petrol in running costs (₹1 vs ₹3-4 per km), zero emissions, instant torque, whisper-quiet operation, and minimal maintenance. The experience is simply superior!",
+                        "The advantages are clear! 70% lower running costs, zero pollution, instant acceleration, silent operation, minimal servicing, and smart connectivity. Plus, you're future-ready with electric!",
+                        "Here's why electric wins: dramatically lower costs, zero emissions, instant power delivery, no noise, reduced maintenance, and cutting-edge technology. It's not just transportation - it's transformation!"
+                    ];
+                }
+                
+                // Thank you responses
+                if (input.includes('thank you') || input.includes('thanks')) {
+                    return [
+                        "You're absolutely welcome! I'm here whenever you need help with Revolt bikes. Is there anything else you'd like to explore?",
+                        "My pleasure! I love helping people discover electric mobility. Any other questions about our bikes?",
+                        "Happy to help! That's what I'm here for. Anything else you'd like to know about the Revolt experience?"
+                    ];
+                }
+                
+                // Goodbye responses
+                if (input.includes('bye') || input.includes('goodbye') || input.includes('see you')) {
+                    return [
+                        "It's been wonderful chatting with you! Remember, the future is electric, and we're here to make that journey exciting. Have a fantastic day!",
+                        "Great talking with you! Feel free to reach out anytime. The electric revolution is just beginning - hope to see you as part of the Revolt family soon!",
+                        "Thanks for the chat! I'm always here when you need me. Remember - ride electric, ride smart, ride Revolt! Take care!"
+                    ];
+                }
+                
+                // Complex or unclear queries
+                if (input.length > 100 || input.includes('what') || input.includes('how') || input.includes('why')) {
+                    return [
+                        `That's a thoughtful question about "${input}". As your Revolt assistant, I can help you with pricing, features, test rides, charging, showroom locations, and comparisons. What specific aspect interests you most?`,
+                        `Interesting question! Let me help you with that. I can provide detailed information about our bikes' specifications, pricing, availability, charging solutions, and much more. Which area would you like to explore?`,
+                        `Great to hear your interest! I'm equipped to answer questions about Revolt bikes - from technical specs to pricing, from test rides to charging infrastructure. What would you like to dive into?`
+                    ];
+                }
+                
+                // Default intelligent response
+                return [
+                    `I appreciate your question about "${input}". I'm here to help you discover everything about Revolt's electric bikes - features, pricing, test rides, charging, and more. What would you like to know?`,
+                    `Thanks for asking! I can assist with all aspects of Revolt bikes including specifications, costs, availability, and the complete ownership experience. What interests you most?`,
+                    `Good question! As your Revolt assistant, I'm ready to help with pricing, features, test booking, charging solutions, and comparisons. What can I explain for you?`
+                ];
+            }
+
+            handleAIResponse(response) {
+                this.conversationHistory.push({
+                    role: 'assistant',
+                    content: response,
+                    timestamp: new Date()
+                });
+                
+                this.responseText.textContent = response;
+                this.transcriptContainer.classList.add('visible');
+                
+                // Always speak the response
+                this.speakResponse(response);
+            }
+
+            speakResponse(text) {
+                if (!this.synthesis) return;
+
+                this.synthesis.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.95;
+                utterance.pitch = 1.1;
+                utterance.volume = 0.9;
+
+                // Enhanced voice selection
+                const voices = this.synthesis.getVoices();
+                let selectedVoice = null;
+                
+                if (this.currentLanguage.startsWith('en')) {
+                    selectedVoice = voices.find(v => 
+                        v.lang.includes('en') && 
+                        (v.name.includes('Female') || v.name.includes('Samantha') || 
+                         v.name.includes('Karen') || v.name.includes('Victoria'))
+                    ) || voices.find(v => v.lang.includes('en-US')) || voices.find(v => v.lang.includes('en'));
+                } else {
+                    const langCode = this.currentLanguage.split('-')[0];
+                    selectedVoice = voices.find(v => v.lang.includes(this.currentLanguage)) ||
+                                  voices.find(v => v.lang.includes(langCode));
+                }
+                
+                if (selectedVoice) {
+                    utterance.voice = selectedVoice;
+                }
+
+                utterance.onstart = () => {
+                    this.statusText.textContent = 'Rev is speaking...';
+                    this.micButton.style.backgroundColor = '#34a853';
+                };
+
+                utterance.onend = () => {
+                    this.statusText.textContent = 'Your turn! Click to talk';
+                    this.micButton.style.backgroundColor = '#4285f4';
+                    
+                    // Auto-restart listening for natural conversation
+                    setTimeout(() => {
+                        if (!this.isListening && !this.isProcessing) {
+                            this.startListening();
+                        }
+                    }, 800);
+                };
+
+                utterance.onerror = (event) => {
+                    console.error('Speech synthesis error:', event.error);
+                    this.statusText.textContent = 'Click to start talking';
+                    this.micButton.style.backgroundColor = '#4285f4';
+                };
+
+                this.synthesis.speak(utterance);
+            }
+
+            toggleTheme() {
+                document.body.classList.toggle('light-theme');
+                this.themeToggle.classList.toggle('light-mode');
+                
+                const isLight = document.body.classList.contains('light-theme');
+                this.statusText.textContent = isLight ? 'Light mode activated!' : 'Dark mode activated!';
+                
+                setTimeout(() => {
+                    this.speakResponse(isLight ? "Switched to light mode! How does it look?" : "Back to dark mode - sleek and modern!");
+                }, 200);
+            }
+
+            showError(message) {
+                this.errorMessage.textContent = message;
+                this.errorMessage.classList.add('visible');
+                
+                setTimeout(() => {
+                    this.errorMessage.classList.remove('visible');
+                }, 5000);
+            }
+        }
+
+        // Initialize the enhanced voice interface
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Initializing Enhanced Revolt Voice Interface...');
+            
+            const revInterface = new RevoltVoiceInterface();
+            window.revoltVoice = revInterface;
+            
+            // Load voices for better speech synthesis
+            if (speechSynthesis.getVoices().length === 0) {
+                speechSynthesis.addEventListener('voiceschanged', () => {
+                    console.log('Voices loaded:', speechSynthesis.getVoices().length);
+                });
+            }
+            
+            console.log('Enhanced Revolt Voice Interface ready with real-time AI!');
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && window.revoltVoice) {
+                window.revoltVoice.stopListening();
+            }
+        });
+    </script>
+</body>
+</html>
