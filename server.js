@@ -154,7 +154,7 @@ class UserSession {
   }
 }
 
-// Enhanced Gemini Live Session with auto-response generation and voice support
+// Enhanced Gemini Live Session with auto-response generation
 class EnhancedGeminiSession {
   constructor(ws, userId) {
     this.ws = ws;
@@ -164,59 +164,6 @@ class EnhancedGeminiSession {
     this.isConnected = false;
     this.autoResponseEnabled = true;
     this.responsePersonality = 'enthusiastic'; // enthusiastic, professional, casual, technical
-    this.voiceSettings = {
-      provider: 'browser', // browser, google, azure, amazon
-      voice: 'default',
-      language: 'en-IN',
-      speed: 1.0,
-      pitch: 1.0,
-      volume: 0.8,
-      gender: 'female' // male, female, neutral
-    };
-    this.availableVoices = this.initializeVoiceOptions();
-  }
-
-  initializeVoiceOptions() {
-    return {
-      browser: {
-        'en-IN': [
-          { name: 'Google हिन्दी', gender: 'female', lang: 'hi-IN' },
-          { name: 'Google English (India)', gender: 'female', lang: 'en-IN' },
-          { name: 'Microsoft Heera - English (India)', gender: 'female', lang: 'en-IN' },
-          { name: 'Microsoft Ravi - English (India)', gender: 'male', lang: 'en-IN' }
-        ],
-        'en-US': [
-          { name: 'Google US English Female', gender: 'female', lang: 'en-US' },
-          { name: 'Google US English Male', gender: 'male', lang: 'en-US' },
-          { name: 'Microsoft Zira - English (United States)', gender: 'female', lang: 'en-US' },
-          { name: 'Microsoft David - English (United States)', gender: 'male', lang: 'en-US' }
-        ]
-      },
-      google: {
-        'en-IN': [
-          { name: 'en-IN-Standard-A', gender: 'female', type: 'Standard' },
-          { name: 'en-IN-Standard-B', gender: 'male', type: 'Standard' },
-          { name: 'en-IN-Standard-C', gender: 'male', type: 'Standard' },
-          { name: 'en-IN-Standard-D', gender: 'female', type: 'Standard' },
-          { name: 'en-IN-Wavenet-A', gender: 'female', type: 'WaveNet' },
-          { name: 'en-IN-Wavenet-B', gender: 'male', type: 'WaveNet' },
-          { name: 'en-IN-Wavenet-C', gender: 'male', type: 'WaveNet' },
-          { name: 'en-IN-Wavenet-D', gender: 'female', type: 'WaveNet' },
-          { name: 'en-IN-Neural2-A', gender: 'female', type: 'Neural2' },
-          { name: 'en-IN-Neural2-B', gender: 'male', type: 'Neural2' },
-          { name: 'en-IN-Neural2-C', gender: 'male', type: 'Neural2' },
-          { name: 'en-IN-Neural2-D', gender: 'female', type: 'Neural2' }
-        ]
-      },
-      azure: {
-        'en-IN': [
-          { name: 'en-IN-NeerjaNeural', gender: 'female', style: 'General' },
-          { name: 'en-IN-PrabhatNeural', gender: 'male', style: 'General' },
-          { name: 'hi-IN-MadhurNeural', gender: 'male', style: 'General' },
-          { name: 'hi-IN-SwaraNeural', gender: 'female', style: 'General' }
-        ]
-      }
-    };
   }
 
   async initialize() {
@@ -248,9 +195,7 @@ class EnhancedGeminiSession {
         type: 'session_ready',
         data: {
           userId: this.userId,
-          capabilities: ['text', 'context_awareness', 'auto_responses', 'intent_detection', 'voice_synthesis'],
-          availableVoices: this.availableVoices,
-          currentVoice: this.voiceSettings
+          capabilities: ['text', 'context_awareness', 'auto_responses', 'intent_detection']
         }
       });
 
@@ -315,12 +260,10 @@ class EnhancedGeminiSession {
           text: response,
           intent: detectedIntent,
           suggestions: await this.generateSuggestions(detectedIntent),
-          voiceData: await this.generateVoiceResponse(response),
           metadata: {
             responseTime: new Date(),
             confidence: 0.95,
-            personality: this.responsePersonality,
-            voiceSettings: this.voiceSettings
+            personality: this.responsePersonality
           }
         }
       });
@@ -450,140 +393,12 @@ Intent:`;
     }
   }
 
-  async generateVoiceResponse(text) {
-    try {
-      // For browser-based TTS, just return the settings
-      if (this.voiceSettings.provider === 'browser') {
-        return {
-          provider: 'browser',
-          text: text,
-          settings: this.voiceSettings,
-          ssml: this.generateSSML(text)
-        };
-      }
-
-      // For external TTS providers, you would integrate their APIs here
-      // This is a placeholder for Google Cloud Text-to-Speech, Azure Speech, etc.
-      return {
-        provider: this.voiceSettings.provider,
-        text: text,
-        settings: this.voiceSettings,
-        audioUrl: null, // Would contain the generated audio URL
-        ssml: this.generateSSML(text)
-      };
-
-    } catch (error) {
-      console.error('Error generating voice response:', error);
-      return null;
-    }
-  }
-
-  generateSSML(text) {
-    // Generate SSML (Speech Synthesis Markup Language) for better voice control
-    const { speed, pitch, volume } = this.voiceSettings;
-    
-    let ssml = `<speak>`;
-    ssml += `<prosody rate="${speed}" pitch="${pitch > 1 ? '+' : ''}${Math.round((pitch - 1) * 50)}%" volume="${Math.round(volume * 100)}%">`;
-    
-    // Add emphasis and pauses for better natural speech
-    let enhancedText = text
-      .replace(/Revolt Motors/g, '<emphasis level="strong">Revolt Motors</emphasis>')
-      .replace(/RV400|RV320/g, '<emphasis level="moderate">  setResponsePersonality(personality) {
+  setResponsePersonality(personality) {
     this.responsePersonality = personality;
-    
-    // Adjust voice characteristics based on personality
-    const personalityVoiceMap = {
-      'enthusiastic': { speed: 1.1, pitch: 1.1, volume: 0.9 },
-      'professional': { speed: 1.0, pitch: 1.0, volume: 0.8 },
-      'casual': { speed: 0.95, pitch: 0.95, volume: 0.85 },
-      'technical': { speed: 0.9, pitch: 0.9, volume: 0.8 }
-    };
-    
-    const voiceAdjustments = personalityVoiceMap[personality];
-    if (voiceAdjustments) {
-      Object.assign(this.voiceSettings, voiceAdjustments);
-    }
-    
     this.sendToClient({
       type: 'personality_updated',
-      data: {
-        personality: personality,
-        voiceSettings: this.voiceSettings
-      }
+      data: personality
     });
-  }</emphasis>')
-      .replace(/\./g, '.<break time="300ms"/>')
-      .replace(/\?/g, '?<break time="500ms"/>')
-      .replace(/!/g, '!<break time="400ms"/>');
-    
-    ssml += enhancedText;
-    ssml += `</prosody>`;
-    ssml += `</speak>`;
-    
-    return ssml;
-  }
-
-  changeVoice(voiceConfig) {
-    try {
-      // Validate voice configuration
-      const { provider, voice, language, speed, pitch, volume, gender } = voiceConfig;
-      
-      // Update voice settings
-      if (provider) this.voiceSettings.provider = provider;
-      if (voice) this.voiceSettings.voice = voice;
-      if (language) this.voiceSettings.language = language;
-      if (speed !== undefined) this.voiceSettings.speed = Math.max(0.25, Math.min(4.0, speed));
-      if (pitch !== undefined) this.voiceSettings.pitch = Math.max(0.5, Math.min(2.0, pitch));
-      if (volume !== undefined) this.voiceSettings.volume = Math.max(0.0, Math.min(1.0, volume));
-      if (gender) this.voiceSettings.gender = gender;
-
-      // Send updated voice settings to client
-      this.sendToClient({
-        type: 'voice_changed',
-        data: {
-          voiceSettings: this.voiceSettings,
-          availableVoices: this.getAvailableVoicesForProvider(this.voiceSettings.provider),
-          message: `Voice changed to ${this.voiceSettings.voice || 'default'} (${this.voiceSettings.gender})`
-        }
-      });
-
-      console.log(`Voice changed for user ${this.userId}:`, this.voiceSettings);
-      return true;
-
-    } catch (error) {
-      console.error('Error changing voice:', error);
-      this.sendToClient({
-        type: 'error',
-        message: 'Failed to change voice settings'
-      });
-      return false;
-    }
-  }
-
-  getAvailableVoicesForProvider(provider) {
-    return this.availableVoices[provider] || {};
-  }
-
-  async testVoice(testText = "Hello! This is Rev, your AI assistant from Revolt Motors. How do I sound?") {
-    try {
-      const voiceData = await this.generateVoiceResponse(testText);
-      
-      this.sendToClient({
-        type: 'voice_test',
-        data: {
-          text: testText,
-          voiceData: voiceData,
-          settings: this.voiceSettings
-        }
-      });
-
-    } catch (error) {
-      console.error('Error testing voice:', error);
-      this.sendToClient({
-        type: 'error',
-        message: 'Failed to test voice'
-      });
-    }
   }
 
   toggleAutoResponses(enabled) {
@@ -643,21 +458,6 @@ wss.on('connection', async (ws, req) => {
           enhancedSession.setResponsePersonality(data.data);
           break;
           
-        case 'change_voice':
-          enhancedSession.changeVoice(data.data);
-          break;
-          
-        case 'test_voice':
-          await enhancedSession.testVoice(data.data?.testText);
-          break;
-          
-        case 'get_available_voices':
-          enhancedSession.sendToClient({
-            type: 'available_voices',
-            data: enhancedSession.availableVoices
-          });
-          break;
-          
         case 'toggle_auto_responses':
           enhancedSession.toggleAutoResponses(data.data);
           break;
@@ -699,42 +499,6 @@ wss.on('connection', async (ws, req) => {
 });
 
 // Enhanced API endpoints
-app.post('/api/change-voice', async (req, res) => {
-  try {
-    const { userId, voiceConfig } = req.body;
-    
-    if (!userId || !voiceConfig) {
-      return res.status(400).json({ error: 'userId and voiceConfig are required' });
-    }
-    
-    const connection = activeConnections.get(userId);
-    if (!connection) {
-      return res.status(404).json({ error: 'User session not found' });
-    }
-    
-    const success = connection.changeVoice(voiceConfig);
-    
-    res.json({
-      success,
-      voiceSettings: connection.voiceSettings,
-      message: success ? 'Voice changed successfully' : 'Failed to change voice'
-    });
-    
-  } catch (error) {
-    console.error('API Error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-app.get('/api/voices', (req, res) => {
-  const tempSession = new EnhancedGeminiSession(null, 'temp');
-  res.json({
-    availableVoices: tempSession.availableVoices,
-    providers: Object.keys(tempSession.availableVoices),
-    defaultSettings: tempSession.voiceSettings
-  });
-});
-
 app.post('/api/generate-response', async (req, res) => {
   try {
     const { message, userId, context } = req.body;
